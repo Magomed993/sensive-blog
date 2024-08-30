@@ -7,10 +7,6 @@ def get_related_posts_count(tag):
     return tag.posts.count()
 
 
-def get_likes_count(post):
-    return post.likes__count
-
-
 def serialize_post(post):
     return {
         'title': post.title,
@@ -34,20 +30,15 @@ def serialize_tag(tag):
 
 def index(request):
 
-    most_popular_posts = []  # TODO. Как это посчитать?
-
-    # posts = Post.objects.all()
     posts = Post.objects.annotate(Count('likes'))
-    popular_posts = sorted(posts, key=get_likes_count)
-    for post in popular_posts[-5:]:
-        most_popular_posts.append(post)
+    most_popular_posts = list(posts.order_by('-likes__count'))[:5]
 
-    fresh_posts = Post.objects.order_by('published_at')
-    most_fresh_posts = list(fresh_posts)[-5:]
+    fresh_posts = Post.objects.order_by('-published_at')
+    most_fresh_posts = list(fresh_posts)[:5]
 
-    tags = Tag.objects.all()
-    popular_tags = sorted(tags, key=get_related_posts_count)
-    most_popular_tags = popular_tags[-5:]
+    tags = Tag.objects.annotate(Count('posts'))
+    popular_tags =tags.order_by('-posts__count')
+    most_popular_tags = popular_tags[:5]
 
     context = {
         'most_popular_posts': [
