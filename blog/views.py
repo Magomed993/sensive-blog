@@ -39,14 +39,14 @@ def serialize_post(post):
 def serialize_tag(tag):
     return {
         'title': tag.title,
-        'posts_with_tag': len(Post.objects.filter(tags=tag)),
+        'posts_with_tag': tag.posts # len(Post.objects.filter(tags=tag)),
     }
 
 
 def index(request):
 
     most_popular_posts = Post.objects.popular() \
-                                     .prefetch_related('author')[:5] \
+                                     .prefetch_related('author', 'tags')[:5] \
                                      .fetch_with_comments_count()
 
     fresh_posts = Post.objects.order_by('-published_at').prefetch_related('author')
@@ -96,7 +96,6 @@ def post_detail(request, slug):
     # popular_tags = sorted(all_tags, key=get_related_posts_count)
     most_popular_tags = popular_tags # popular_tags[-5:]
 
-    most_popular_posts = []  # TODO. Как это посчитать?
     most_popular_posts = Post.objects.popular() \
                                      .prefetch_related('author')[:5] \
                                      .fetch_with_comments_count()
