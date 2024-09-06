@@ -12,11 +12,9 @@ class CustomQuerySet(models.QuerySet):
 
     def popular(self):
         posts_popular = self.annotate(likes_count=Count('likes')).order_by('-likes_count')
-        # most_popular_posts_ids = [post.id for post in most_popular_posts]
         return posts_popular
 
     def fetch_with_comments_count(self):
-        # posts_with_comments = self.annotate(comments_count=Count('comments'))
         most_popular_posts = self.annotate(likes_count=Count('likes', distinct=True))
 
         most_popular_posts_ids = [post.id for post in most_popular_posts]
