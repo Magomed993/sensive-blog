@@ -25,9 +25,10 @@ class CustomQuerySet(models.QuerySet):
         return most_popular_posts
 
     def displays_advance(self):
-        post_with_authors_and_tags = self.prefetch_related('author', Prefetch('tags',
+        post_with_authors_and_tags = self.prefetch_related(Prefetch('tags',
                                                  queryset = Tag.objects.annotate(popular_count=Count('posts')) \
-                                                 .order_by('-popular_count')))
+                                                 .order_by('-popular_count'))) \
+                                                 .select_related('author')
         return post_with_authors_and_tags
 
 
