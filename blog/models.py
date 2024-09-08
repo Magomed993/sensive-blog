@@ -17,19 +17,20 @@ class CustomQuerySet(models.QuerySet):
     def fetch_with_comments_count(self):
         most_popular_posts = self.annotate(likes_count=Count('likes', distinct=True))
         most_popular_posts_ids = [post.id for post in most_popular_posts]
-        posts_with_comments = Post.objects.filter(id__in=most_popular_posts_ids).annotate(comments_count=Count('comments', distinct=True))
+        posts_with_comments = Post.objects.filter(id__in=most_popular_posts_ids) \
+                                          .annotate(comments_count=Count('comments', distinct=True))
         ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
         count_for_id = dict(ids_and_comments)
         for post in most_popular_posts:
             post.comments_count = count_for_id[post.id]
         return most_popular_posts
 
-    def displays_advance(self):
-        post_with_authors_and_tags = self.prefetch_related(Prefetch('tags',
+    def displays_advance_tags(self):
+        post_with_tags = self.prefetch_related(Prefetch('tags',
                                                  queryset = Tag.objects.annotate(popular_count=Count('posts')) \
                                                  .order_by('-popular_count'))) \
                                                  .select_related('author')
-        return post_with_authors_and_tags
+        return post_with_tags
 
 
 class TagQuerySet(models.QuerySet):
